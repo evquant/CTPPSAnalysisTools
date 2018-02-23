@@ -3,6 +3,7 @@
 
 #include "DataFormats/Provenance/interface/EventRange.h"
 
+#include <vector>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -14,6 +15,22 @@ namespace ctpps
     public:
       LHCConditionsFactory() {}
       ~LHCConditionsFactory() {}
+
+      struct conditions_t
+      {
+        edm::EventRange range;
+        unsigned int fill;
+        std::string time, status;
+        struct luminosity_t { double delivered, recorded; };
+        luminosity_t luminosity;
+        double crossing_angle;
+      };
+      friend std::ostream& operator<<( std::ostream& os, const conditions_t& cond ) {
+        return os << "range " << cond.range << " (fill " << cond.fill << "):" << std::endl
+                  << " : time: " << cond.time << " | LHC status: " << cond.status << std::endl
+                  << " : luminosity: delivered = " << cond.luminosity.delivered << " ub-1, recorded = " << cond.luminosity.recorded << " ub-1" << std::endl
+                  << " : crossing angle: " << cond.crossing_angle << " urad";
+      }
 
       void feedConditions( const char* filename ) {
         std::ifstream file( filename );
@@ -29,6 +46,7 @@ namespace ctpps
           std::vector<std::string> fields;
           while ( std::getline( ss, field, ',' ) )
             fields.emplace_back( field );
+          if ( fields.size() == 0 ) continue;
           if ( fields.size() != num_fields )
             throw std::runtime_error( std::string( "Failed to parse the following line:\n\t" )+line );
           // parse the run <-> fill association map
@@ -41,31 +59,34 @@ namespace ctpps
           const unsigned int run = std::stoi( f_run_fill[0] ), fill = std::stoi( f_run_fill[1] );
           // parse the LS range
           ss = std::istringstream( fields[lsrange] );
-          std::cout << run << "//" << fill << "\t" << fields[xangle] << std::endl;
+          std::vector<std::string> f_lsrange;
+          while ( std::getline( ss, field, ':' ) )
+            f_lsrange.emplace_back( field );
+          if ( f_lsrange.size() != 2 )
+            throw std::runtime_error( std::string( "Failed to parse the LS range: " )+fields[lsrange] );
+          unsigned int ls_beg = std::stoi( f_lsrange[0] ), ls_end = std::stoi( f_lsrange[1] );
+          if ( ls_end == 0 ) ls_end = ls_beg;
+          edm::EventRange range( run, ls_beg, 1, run, ls_end, 0 );
+          conditions_.emplace_back( conditions_t{ range, fill, fields[time], fields[status], { std::stod( fields[deliv] ), std::stod( fields[reco] ) }, std::stod( fields[xangle] ) } );
         }
       }
 
       void dump() const {
+        for ( const auto& cond : conditions_ )
+          std::cout << cond << std::endl;
+      }
+
+      conditions_t get( const edm::EventID& ev ) const {
+        for ( const auto& cond: conditions_ )
+          if ( edm::contains( cond.range, ev ) ) return cond;
+        std::ostringstream ev_dmp; ev_dmp << ev;
+        throw std::runtime_error( std::string( "Failed to retrieve LHC conditions for event " )+ev_dmp.str() );
       }
 
     private:
       /// CSV fields
       enum field_names_ { run_fill = 0, lsrange, time, status, deliv, reco, xangle, num_fields };
-      struct lsrange_t
-      {
-        lsrange_t( unsigned int begin = 0, unsigned int end = 0 ) :
-          begin( begin ), end( end ) {}
-        operator<( const lsrange_t& rhs ) const {
-          if ( begin < rhs.begin ) return true;
-          if ( begin == rhs.begin && end < rhs.end ) return true;
-          return false;
-        }
-        unsigned int begin, end;
-      };
-      struct conditions_t
-      {
-      };
-      std::map<lsrange_t,conditions_t> cond_map_;
+      std::vector<conditions_t> conditions_;
   };
 }
 
