@@ -14,7 +14,10 @@ process.source = cms.Source('PoolSource',
 )
 
 process.load('CTPPSAnalysisTools.Analyzer.testAnalyzer_cfi')
-process.testAnalyzer.potsConsidered = cms.vuint32(3, 23, 103, 123)
+process.testAnalyzer.potsConsidered = cms.vuint32(
+    3, 103, # strips far detectors (210m)
+    23, 123 # pixels far detectors (220m)
+)
 
 # prepare the output file
 process.TFileService = cms.Service('TFileService',
