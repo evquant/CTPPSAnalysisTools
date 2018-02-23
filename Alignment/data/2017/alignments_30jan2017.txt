@@ -1,0 +1,9 @@
+# pre-TS2 2017 alignment parameters
+# expressed in cm
+# from:
+#   https://indico.cern.ch/event/699489/contributions/2874674/attachments/1592031/2519808/jan_kaspar_alignment_2017_preTS2.pdf
+# beg, end,   rp, align
+296641,302695,003,-0.37
+296641,302695,023,-4.205
+296641,302695,103,-0.275
+296641,302695,123,-4.205
