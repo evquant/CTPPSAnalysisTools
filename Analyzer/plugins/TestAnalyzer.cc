@@ -114,8 +114,14 @@ TestAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup )
     h2_hitmaps_[raw_id]->Fill( trk_x_corr, trk.getY()/10. ); // expressed in cm
 
     double xi = 0., xi_err = 0.;
-    xi_reco_.reconstruct( xangle, raw_id, trk_x_corr, xi, xi_err );
-    h_xi_[raw_id]->Fill( xi );
+    try {
+      xi_reco_.reconstruct( xangle, raw_id, trk_x_corr, xi, xi_err );
+      h_xi_[raw_id]->Fill( xi );
+    } catch ( std::runtime_error ) {
+      // avoids to break the processing if a xing angle value was not found
+      // (additional ones will be added as soon as they are available)
+      continue;
+    }
   }
 }
 
