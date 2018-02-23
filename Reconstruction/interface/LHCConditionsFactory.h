@@ -10,27 +10,27 @@
 
 namespace ctpps
 {
+  struct conditions_t
+  {
+    edm::EventRange range;
+    unsigned int fill;
+    std::string time, status;
+    struct luminosity_t { double delivered, recorded; };
+    luminosity_t luminosity;
+    double crossing_angle;
+  };
+  std::ostream& operator<<( std::ostream& os, const conditions_t& cond ) {
+    return os << "range " << cond.range << " (fill " << cond.fill << "):" << std::endl
+              << " : time: " << cond.time << " | LHC status: " << cond.status << std::endl
+              << " : luminosity: delivered = " << cond.luminosity.delivered << " ub-1, recorded = " << cond.luminosity.recorded << " ub-1" << std::endl
+              << " : crossing angle: " << cond.crossing_angle << " urad";
+  }
+
   class LHCConditionsFactory
   {
     public:
       LHCConditionsFactory() {}
       ~LHCConditionsFactory() {}
-
-      struct conditions_t
-      {
-        edm::EventRange range;
-        unsigned int fill;
-        std::string time, status;
-        struct luminosity_t { double delivered, recorded; };
-        luminosity_t luminosity;
-        double crossing_angle;
-      };
-      friend std::ostream& operator<<( std::ostream& os, const conditions_t& cond ) {
-        return os << "range " << cond.range << " (fill " << cond.fill << "):" << std::endl
-                  << " : time: " << cond.time << " | LHC status: " << cond.status << std::endl
-                  << " : luminosity: delivered = " << cond.luminosity.delivered << " ub-1, recorded = " << cond.luminosity.recorded << " ub-1" << std::endl
-                  << " : crossing angle: " << cond.crossing_angle << " urad";
-      }
 
       void feedConditions( const char* filename ) {
         std::ifstream file( filename );
