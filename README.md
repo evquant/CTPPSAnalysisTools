@@ -4,10 +4,10 @@ This repository provides a collection of useful tools for the analysis of post-2
 
 ## Usage
 
-In your favourite `${CMSSW_BASE}/src` environment, just checkout this repository through:
+In your favourite `${CMSSW_BASE}/src/SubPackage` environment, just checkout this repository as a submodule through:
 
 ```.sh
-git clone https://github.com/forthommel/CTPPSAnalysisTools.git
+git submodule add -b standalone https://github.com/forthommel/CTPPSAnalysisTools.git
 ```
 
 ### `CMSSW` supported versions
