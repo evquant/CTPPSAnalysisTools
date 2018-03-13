@@ -31,9 +31,9 @@
 #include "DataFormats/CTPPSDetId/interface/CTPPSDetId.h"
 #include "DataFormats/CTPPSReco/interface/CTPPSLocalTrackLite.h"
 
-#include "CTPPSAnalysisTools/Alignment/interface/AlignmentsFactory.h"
-#include "CTPPSAnalysisTools/Reconstruction/interface/LHCConditionsFactory.h"
-#include "CTPPSAnalysisTools/Reconstruction/interface/XiReconstructor.h"
+#include "../interface/AlignmentsFactory.h"
+#include "../interface/LHCConditionsFactory.h"
+#include "../interface/XiReconstructor.h"
 
 #include "TH1D.h"
 #include "TH2D.h"
