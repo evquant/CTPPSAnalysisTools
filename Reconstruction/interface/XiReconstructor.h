@@ -22,6 +22,26 @@ namespace ctpps
       XiReconstructor() {}
       ~XiReconstructor() {}
 
+      void interpolateCrossingAngle( double xangle, double scaling ) {
+        if ( disp_vs_xa_.count( xangle ) > 0 ) {
+          std::cerr << "Warning: Crossing angle " << xangle << " already present in the database.";
+          return;
+        }
+        if ( xangle < disp_vs_xa_.begin()->first )
+          throw std::runtime_error( std::string( "Crossing angle of " )+std::to_string( xangle )+std::string( " lower than minimal one!" ) );
+        // we may interpolate if crossing angle higher than maximum stored one
+        const double highest_xangle = disp_vs_xa_.rbegin()->first;
+        std::cerr << "Added dispersion for xangle=" << xangle << " urad:\n";
+        for ( const auto& pot_disp : disp_vs_xa_.rbegin()->second ) {
+          disp_vs_xa_[xangle][pot_disp.first] = dispersion_t{
+            pot_disp.second.value+scaling*( ( xangle-highest_xangle ) ),
+            pot_disp.second.err_value+scaling*( ( xangle-highest_xangle ) ) //FIXME
+          };
+          std::cerr << ">> RP" << pot_disp.first << ": "
+            << disp_vs_xa_[xangle][pot_disp.first].value << " +/- "
+            << disp_vs_xa_[xangle][pot_disp.first].err_value << "\n";
+        }
+      }
       void reconstruct( double xangle, unsigned short pot, double x_aligned, double& xi, double& xi_err ) const {
         if ( disp_vs_xa_.count( xangle ) == 0 )
           throw std::runtime_error( std::string( "Failed to retrieve the dispersion values for this crossing-angle: ")+std::to_string( xangle ) );
@@ -29,10 +49,9 @@ namespace ctpps
         if ( disp_vs_pot.count( pot ) == 0 )
           throw std::runtime_error( std::string( "Failed to retrieve the dispersion values for this pot: ")+std::to_string( pot ) );
 
-        const double align_err = 150.e-4; // in cm
         const dispersion_t disp = disp_vs_pot.at( pot ); // in cm
         xi = x_aligned/( -disp.value );
-        xi_err = sqrt( pow( align_err/disp.value, 2 )+pow( disp.err_value*xi, 2 ) );
+        xi_err = std::hypot( align_err_/disp.value, disp.err_value*xi );
       }
 
       void feedDispersions( const char* filename ) {
@@ -64,8 +83,10 @@ namespace ctpps
           }
         }
       }
+      const std::map<float,dispersions_t>& dispersions() const { return disp_vs_xa_; }
 
     private:
+      static constexpr double align_err_ = 150.e-4; // in cm
       std::map<float,dispersions_t> disp_vs_xa_;
   };
 }
