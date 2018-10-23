@@ -1,0 +1,15 @@
+# pre- and post-TS2 2017 alignment parameters
+# expressed in cm
+# from:
+#   https://indico.cern.ch/event/750869/contributions/3108433/attachments/1703147/2743502/alignment2017_update.pdf
+# pre-TS2, 210-fr pots
+296641,302695,003,-0.34
+296641,302695,103,-0.27
+296641,302695,023,-4.24
+296641,302695,123,-4.17
+# post-TS2, 210-fr pots
+303824,999999,003,-0.415
+303824,999999,103,-0.285
+303824,999999,023,-4.25
+303824,999999,123,-4.20
+

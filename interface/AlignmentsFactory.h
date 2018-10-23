@@ -15,6 +15,9 @@ namespace ctpps
     double x_align, x_align_err;
     double y_align, y_align_err;
   };
+  std::ostream& operator<<( std::ostream& os, const alignment_t al ) {
+    return os << "{x=" << al.x_align << "+/-" << al.x_align_err << "; y=" << al.y_align << "+/-" << al.y_align_err << "}";
+  }
   class AlignmentsFactory
   {
     public:
